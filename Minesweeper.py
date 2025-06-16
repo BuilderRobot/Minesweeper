@@ -2,14 +2,16 @@ import pygame
 import sys
 import numpy as np
 import random
+import json
 import os
 
-# First thing in any pygame program - initializes pygame's internal variables.
 pygame.init()
-resolution_info = pygame.display.Info()
-TILE_SIZE = int(resolution_info.current_h / 28)
 
 sizes = [(10, 8), (18, 14), (24, 20)]
+
+# get screen resolution and set tile size accordingly (large difficulty fits nicely)
+resolution_info = pygame.display.Info()
+TILE_SIZE = int(resolution_info.current_h / sizes[2][0])
 
 difficulty_num = 0
 
@@ -41,21 +43,41 @@ game_won = False
 first_click = True
 last_xy_clicked = (-1, -1)
 
+difficulty_names = ["easy", "medium", "hard"]
+best_times_file = "best_times.txt"
+
 
 # load current high score or create new file with -1
-def load_high_score():
-    if not os.path.exists("best_time.txt"):
-        with open("best_time.txt", "w") as f:
-            f.write("-1")
-        return -1
-    with open("best_time.txt", "r") as f:
-        return int(f.read())
+def load_high_scores():
+    global difficulty_names
+    global best_times_file
+
+    # If the file doesn’t exist, create with -1s
+    if not os.path.exists(best_times_file):
+        initial = { "easy": -1,
+                    "medium": -1,
+                    "hard": -1
+                    }
+        with open(best_times_file, "w") as f:
+            json.dump(initial, f)
+        return initial
+
+    with open(best_times_file, "r") as f:
+        return json.load(f)
 
 
 # Save a new high score
 def save_high_score(score):
-    with open("best_time.txt", "w") as f:
-        f.write(str(score))
+    global difficulty_names
+    global difficulty_num
+    scores = load_high_scores()
+    difficulty_name = difficulty_names[difficulty_num]
+    # Only overwrite if the new score is higher
+    if scores.get(difficulty_name, 0) == -1 or score < scores.get(difficulty_name, 0):
+        scores[difficulty_name] = score
+        best_times[difficulty_names[difficulty_num]] = score
+        with open(best_times_file, "w") as f:
+            json.dump(scores, f)
 
 
 def create_window(difficulty):
@@ -123,7 +145,7 @@ def draw_sprites():
 def draw_UI():
     global game_won
     global win_time
-    global best_time
+    global best_times
     global num_bombs
     global num_flags
     UI_rect = pygame.Rect((0, 0), (WINDOW_WIDTH, 2 * TILE_SIZE))
@@ -148,7 +170,7 @@ def draw_UI():
     if game_won:
         draw_text("You Win!", 0, WINDOW_HEIGHT / 2)
         draw_text("Time: " + str(win_time / 1000) + " s", 0, WINDOW_HEIGHT / 2 + TILE_SIZE)
-        draw_text("Best: " + str(best_time / 1000) + " s", 0, WINDOW_HEIGHT / 2 + TILE_SIZE * 2)
+        draw_text("Best: " + str(best_times[difficulty_names[difficulty_num]] / 1000) + " s", 0, WINDOW_HEIGHT / 2 + TILE_SIZE * 2)
 
 
 def click_UI(screenx, screeny):
@@ -229,7 +251,8 @@ def check_win():
     global num_bombs
     global win_time
     global start_time
-    global best_time
+    global best_times
+    global difficulty_num
     correct = 0
     for tile in board.flat:
         if tile.flagged and tile.is_bomb:
@@ -243,8 +266,7 @@ def check_win():
             win_sound.play()
         # track time to win
         win_time = pygame.time.get_ticks() - start_time
-        if best_time < 0 or win_time < best_time:
-            best_time = win_time
+        save_high_score(win_time)
 
 
 class Tile:
@@ -430,7 +452,7 @@ womps = [pygame.mixer.Sound("sounds/low.mp3"),
 clock = pygame.time.Clock()
 start_time = 0
 win_time = 0
-best_time = load_high_score()
+best_times = load_high_scores()  # dictionary
 
 
 # cheat function that flags all the bombs
@@ -457,6 +479,7 @@ def start_game():
     global dark_tile
     global clock
     global start_time
+    global difficulty_num
 
     # track start time
     start_time = pygame.time.get_ticks()
@@ -483,7 +506,7 @@ def start_game():
         for event in pygame.event.get():
             # The pygame.QUIT event happens when someone tries to close the game window.
             if event.type == pygame.QUIT:
-                save_high_score(best_time)
+                save_high_score(best_times[difficulty_names[difficulty_num]])
                 sys.exit()
 
             # pygame.MOUSEBUTTONDOWN occurs when the user clicks any mouse button
@@ -514,8 +537,12 @@ def start_game():
                     temp = dark_tile
                     dark_tile = light_tile
                     light_tile = temp
+
                 if event.key == pygame.K_0:  # 0 = insta win lol
                     reveal_all()
+
+                if event.key == pygame.K_r:  # r is also reset
+                    start_game()
 
         draw_sprites()
         draw_UI()
