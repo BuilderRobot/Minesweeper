@@ -12,3 +12,11 @@ UI
 - The flag counter shows you how many flags you have left
 - Sound is toggleable with the speaker icon
 - Instantly reset with the button in the top right
+
+Libraries used
+- pygame
+- sys
+- numpy
+- random
+- json
+- os
