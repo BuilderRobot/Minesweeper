@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import pygame
 import sys
 import numpy as np
@@ -11,7 +13,7 @@ sizes = [(10, 8), (18, 14), (24, 20)]
 
 # get screen resolution and set tile size accordingly (large difficulty fits nicely)
 resolution_info = pygame.display.Info()
-TILE_SIZE = int(resolution_info.current_h / sizes[2][0])
+TILE_SIZE = int(resolution_info.current_h / (sizes[2][0] + 4))
 
 difficulty_num = 0
 
