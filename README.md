@@ -14,5 +14,14 @@
 - Reset with the button in the top right
 
 ## Getting Started
-pip install -r requirements.txt
-python minesweeper.py
+
+1. **Clone the repo**  
+   ```bash
+   git clone https://github.com/BuilderRobot/Minesweeper.git
+   cd Minesweeper
+2. **Install requirements**
+   ```bash
+   python -m pip install -r requirements.txt
+3. **Run the game**
+   ```bash
+   python minesweeper.py
