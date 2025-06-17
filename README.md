@@ -18,10 +18,12 @@
 1. **Clone the repo**  
    ```bash
    git clone https://github.com/BuilderRobot/Minesweeper.git
+2. **Change directory**
+   ```bash
    cd Minesweeper
-2. **Install requirements**
+3. **Install requirements**
    ```bash
    python -m pip install -r requirements.txt
-3. **Run the game**
+4. **Run the game**
    ```bash
    python minesweeper.py
