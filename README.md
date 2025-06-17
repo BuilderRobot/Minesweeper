@@ -14,10 +14,6 @@ UI
 - Sound is toggleable with the speaker icon
 - Reset with the button in the top right
 
-Libraries used
-- pygame
-- sys
-- numpy
-- random
-- json
-- os
+To play:
+pip install -r requirements.txt
+python minesweeper.py
